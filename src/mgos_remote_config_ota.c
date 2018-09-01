@@ -16,17 +16,21 @@ static const void *get_ota_config(void *store) { return store; }
 
 static bool update_ota_config(void *store, const struct json_token *token,
                               const char *path) {
+  LOG(LL_DEBUG, ("update_ota_config"));
   struct remote_ota_config *data = (struct remote_ota_config *)store;
   switch (token->type) {
     case JSON_TYPE_OBJECT_END: {
-      char *uri;
-      char *crcHex;
-      char *version;
+      char *uri = NULL;
+      char *crcHex = NULL;
+      char *version = NULL;
+      LOG(LL_DEBUG, ("update_ota_config.scanf"));
       if (json_scanf(token->ptr, token->len, "{uri: %Q, crc: %Q, ver: %Q}",
                      &uri, &crcHex, &version) == 3) {
+        LOG(LL_DEBUG, ("update_ota_config.strtol"));
         uint32_t crc = strtol(crcHex, NULL, 16);
         free(crcHex);
 
+        LOG(LL_DEBUG, ("update_ota_config.strcmp"));
         if (strcmp(uri, data->uri) == 0 &&
             strcmp(version, data->version) == 0 && crc == data->crc32) {
           free(uri);
@@ -34,6 +38,7 @@ static bool update_ota_config(void *store, const struct json_token *token,
           return false;
         }
 
+        LOG(LL_DEBUG, ("update_ota_config.free-old"));
         free(data->version);
         free(data->uri);
         data->version = version;
@@ -69,9 +74,12 @@ struct mgos_remote_config_data mgos_remote_config_data_ota_config() {
 }
 
 void mgos_remote_config_update_ev(int ev, void *ev_data, void *userdata) {
+  LOG(LL_DEBUG, ("mgos_remote_config_update_ev"));
   struct mgos_remote_config_update *update =
       (struct mgos_remote_config_update *)ev_data;
+  LOG(LL_DEBUG, ("mgos_remote_config_update_ev.strcmp"));
   if (strcmp(update->path, OTA_CONFIG_KEY) == 0) {
+    LOG(LL_DEBUG, ("mgos_remote_config_update_ev.deref"));
     struct remote_ota_config *data = (struct remote_ota_config *)update->value;
     LOG(LL_INFO, ("Trigger new update to version: %s", data->version));
     // TODO: Trigger some update event that starts the download
