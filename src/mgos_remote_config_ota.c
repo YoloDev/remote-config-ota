@@ -2,6 +2,7 @@
 #include "common/cs_dbg.h"
 #include "frozen.h"
 #include "mgos_sys_config.h"
+#include "mgos_yolodev_ota.h"
 
 // #define OTA_VERSION_FILE "ota_version.json"
 #define OTA_CONFIG_KEY ".ota"
@@ -88,15 +89,27 @@ struct mgos_remote_config_data mgos_remote_config_data_ota_config() {
 }
 
 void mgos_remote_config_update_ev(int ev, void *ev_data, void *userdata) {
-  LOG(LL_DEBUG, ("mgos_remote_config_update_ev"));
   struct mgos_remote_config_update *update =
       (struct mgos_remote_config_update *)ev_data;
-  LOG(LL_DEBUG, ("mgos_remote_config_update_ev.strcmp"));
   if (safe_strcmp(update->path, OTA_CONFIG_KEY) == 0) {
-    LOG(LL_DEBUG, ("mgos_remote_config_update_ev.deref"));
     struct remote_ota_config *data = (struct remote_ota_config *)update->value;
-    LOG(LL_INFO, ("Trigger new update to version: %s", data->version));
-    // TODO: Trigger some update event that starts the download
+    struct update_context *context = updater_context_get_current();
+    if (context != NULL) {
+      LOG(LL_INFO, ("We are already in the middle of an OTA update, update is "
+                    "ignored, and will be updated next time."));
+      return;
+    }
+
+    context =
+        updater_context_create(5 * 60 * 1000 /* allow 5 minutes to update */);
+    struct yolodev_ota_request *request =
+        malloc(sizeof(struct yolodev_ota_request));
+    request->location = data->uri;
+    request->crc32 = data->crc32;
+    request->updater_context = context;
+    LOG(LL_INFO, ("Trigger request for new version: %s", data->version));
+    mgos_event_trigger(YOLODEV_OTA_REQUEST, request);
+    free(request);
   }
 
   (void)ev;

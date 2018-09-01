@@ -4,6 +4,8 @@
 #include "mgos_remote_config.h"
 #include "mgos_updater_common.h"
 
+#define MGOS_REMOTE_CONFIG_OTA_BASE MGOS_EVENT_BASE('R', 'O', 'T')
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

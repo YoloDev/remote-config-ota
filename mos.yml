@@ -31,6 +31,8 @@ libs:
   - origin: https://github.com/mongoose-os-libs/ota-common
   - origin: https://github.com/YoloDev/remote-config
     version: master
+  - origin: https://github.com/YoloDev/yolodev-ota
+    version: master
 
 # Used by the mos tool to catch mos binaries incompatible with this file format
 manifest_version: 2017-09-29
