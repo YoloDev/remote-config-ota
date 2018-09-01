@@ -32,29 +32,27 @@ static int safe_strcmp(const char *left, const char *right) {
 
 static bool update_ota_config(void *store, const struct json_token *token,
                               const char *path) {
-  LOG(LL_DEBUG, ("update_ota_config"));
   struct remote_ota_config *data = (struct remote_ota_config *)store;
   switch (token->type) {
     case JSON_TYPE_OBJECT_END: {
       char *uri = NULL;
       char *crcHex = NULL;
       char *version = NULL;
-      LOG(LL_DEBUG, ("update_ota_config.scanf"));
       if (json_scanf(token->ptr, token->len, "{uri: %Q, crc: %Q, ver: %Q}",
                      &uri, &crcHex, &version) == 3) {
-        LOG(LL_DEBUG, ("update_ota_config.strtol"));
         uint32_t crc = strtol(crcHex, NULL, 16);
         free(crcHex);
 
-        LOG(LL_DEBUG, ("update_ota_config.strcmp"));
         if (safe_strcmp(uri, data->uri) == 0 &&
             safe_strcmp(version, data->version) == 0 && crc == data->crc32) {
+          LOG(LL_INFO,
+              ("OTA config was the same as previous config, ignoring"));
           free(uri);
           free(version);
           return false;
         }
 
-        LOG(LL_DEBUG, ("update_ota_config.free-old"));
+        LOG(LL_DEBUG, ("New ota config received, storing"));
         free(data->version);
         free(data->uri);
         data->version = version;
