@@ -14,6 +14,22 @@ struct remote_ota_config {
 
 static const void *get_ota_config(void *store) { return store; }
 
+static int safe_strcmp(const char *left, const char *right) {
+  if (left == right) {
+    return 0;
+  }
+
+  if (left == NULL) {
+    return -1;
+  }
+
+  if (right == NULL) {
+    return 1;
+  }
+
+  return strcmp(left, right);
+}
+
 static bool update_ota_config(void *store, const struct json_token *token,
                               const char *path) {
   LOG(LL_DEBUG, ("update_ota_config"));
@@ -31,8 +47,8 @@ static bool update_ota_config(void *store, const struct json_token *token,
         free(crcHex);
 
         LOG(LL_DEBUG, ("update_ota_config.strcmp"));
-        if (strcmp(uri, data->uri) == 0 &&
-            strcmp(version, data->version) == 0 && crc == data->crc32) {
+        if (safe_strcmp(uri, data->uri) == 0 &&
+            safe_strcmp(version, data->version) == 0 && crc == data->crc32) {
           free(uri);
           free(version);
           return false;
@@ -78,7 +94,7 @@ void mgos_remote_config_update_ev(int ev, void *ev_data, void *userdata) {
   struct mgos_remote_config_update *update =
       (struct mgos_remote_config_update *)ev_data;
   LOG(LL_DEBUG, ("mgos_remote_config_update_ev.strcmp"));
-  if (strcmp(update->path, OTA_CONFIG_KEY) == 0) {
+  if (safe_strcmp(update->path, OTA_CONFIG_KEY) == 0) {
     LOG(LL_DEBUG, ("mgos_remote_config_update_ev.deref"));
     struct remote_ota_config *data = (struct remote_ota_config *)update->value;
     LOG(LL_INFO, ("Trigger new update to version: %s", data->version));
