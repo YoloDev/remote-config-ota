@@ -93,23 +93,7 @@ void mgos_remote_config_update_ev(int ev, void *ev_data, void *userdata) {
       (struct mgos_remote_config_update *)ev_data;
   if (safe_strcmp(update->path, OTA_CONFIG_KEY) == 0) {
     struct remote_ota_config *data = (struct remote_ota_config *)update->value;
-    struct update_context *context = updater_context_get_current();
-    if (context != NULL) {
-      LOG(LL_INFO, ("We are already in the middle of an OTA update, update is "
-                    "ignored, and will be updated next time."));
-      return;
-    }
-
-    context =
-        updater_context_create(5 * 60 * 1000 /* allow 5 minutes to update */);
-    struct yolodev_ota_request *request =
-        malloc(sizeof(struct yolodev_ota_request));
-    request->uri = data->uri;
-    request->crc32 = data->crc32;
-    request->updater_context = context;
-    LOG(LL_INFO, ("Trigger request for new version: %s", data->version));
-    mgos_event_trigger(YOLODEV_OTA_REQUEST, request);
-    free(request);
+    yolodev_request_ota(data->uri, data->crc32);
   }
 
   (void)ev;
