@@ -104,7 +104,7 @@ void mgos_remote_config_update_ev(int ev, void *ev_data, void *userdata) {
         updater_context_create(5 * 60 * 1000 /* allow 5 minutes to update */);
     struct yolodev_ota_request *request =
         malloc(sizeof(struct yolodev_ota_request));
-    request->location = data->uri;
+    request->uri = data->uri;
     request->crc32 = data->crc32;
     request->updater_context = context;
     LOG(LL_INFO, ("Trigger request for new version: %s", data->version));
