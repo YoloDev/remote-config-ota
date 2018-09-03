@@ -31,28 +31,28 @@ static int safe_strcmp(const char *left, const char *right) {
   return strcmp(left, right);
 }
 
-static uint8_t hex_char_to_int(char c) {
+static uint8_t hex_char_to_int(char c, const char *str) {
   if (c >= '0' && c <= '9')
     return c - '0';
   if (c >= 'a' && c <= 'f')
     return c - 'a' + 10;
   if (c >= 'A' && c <= 'F')
     return c - 'A' + 10;
-  LOG(LL_WARN, ("Invalid crc char: %d", c));
+  LOG(LL_WARN, ("Invalid crc char in string: %s", str));
   return 0;
 }
 
 static uint32_t hext_to_int(const char *str) {
   // These should always have length 8
   char c0, c1, c2, c3, c4, c5, c6, c7;
-  c0 = hex_char_to_int(str[0]);
-  c1 = hex_char_to_int(str[1]);
-  c2 = hex_char_to_int(str[2]);
-  c3 = hex_char_to_int(str[3]);
-  c4 = hex_char_to_int(str[4]);
-  c5 = hex_char_to_int(str[5]);
-  c6 = hex_char_to_int(str[6]);
-  c7 = hex_char_to_int(str[7]);
+  c0 = hex_char_to_int(str[0], str);
+  c1 = hex_char_to_int(str[1], str);
+  c2 = hex_char_to_int(str[2], str);
+  c3 = hex_char_to_int(str[3], str);
+  c4 = hex_char_to_int(str[4], str);
+  c5 = hex_char_to_int(str[5], str);
+  c6 = hex_char_to_int(str[6], str);
+  c7 = hex_char_to_int(str[7], str);
 
   uint32_t ret = 0;
   ret += c0;
