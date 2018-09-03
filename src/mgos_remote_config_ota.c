@@ -42,6 +42,7 @@ static bool update_ota_config(void *store, const struct json_token *token,
       if (json_scanf(token->ptr, token->len, "{uri: %Q, crc: %Q, ver: %Q}",
                      &uri, &crcHex, &version) == 3) {
         uint32_t crc = strtol(crcHex, NULL, 16);
+        LOG(LL_DEBUG, ("CRC: %s parsed as %x", crcHex, crc));
         free(crcHex);
 
         if (safe_strcmp(uri, data->uri) == 0 &&
